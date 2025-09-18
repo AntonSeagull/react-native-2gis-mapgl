@@ -1,6 +1,6 @@
 {
   "name": "react-native-2gis-mapgl",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "React Native-обёртка над 2GIS MapGL JS API, позволяющая встраивать интерактивные карты 2ГИС в мобильные приложения.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -38,7 +38,8 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli lib",
     "prepare": "bob build",
-    "release": "release-it --only-version"
+    "release": "release-it --only-version",
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "react-native",
@@ -85,6 +86,7 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
+    "@react-native-async-storage/async-storage": "*",
     "react-native-webview": "*"
   },
   "workspaces": [

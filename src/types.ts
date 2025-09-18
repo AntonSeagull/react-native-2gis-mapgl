@@ -143,7 +143,7 @@ export interface MapOptions {
     /**
      * The key that allows usage of the API.
      */
-    apiKey: string;
+    key: string;
     /**
      * Whether a zoom control should be added during the map initialization. By default it's `"topRight"`.
      * Set to `false` to not add the control.
@@ -229,7 +229,7 @@ export interface MapOptions {
     /**
      * The map style ID, that you can get at https://styles.2gis.com
      */
-    style?: string;
+    style?: string | "dark" | "light";
     /**
      * Map style global variables
      */
@@ -291,57 +291,25 @@ export interface MapOptions {
     graphicsPreset?: 'auto' | GraphicsPresetName;
 }
 
-export const mapOptionsKeys = [
-    "center",
-    "zoom",
-    "styleZoom",
-    "minZoom",
-    "maxZoom",
-    "maxBounds",
-    "loopWorld",
-    "rotation",
-    "touchRotationThreshold",
-    "pitch",
-    "minPitch",
-    "maxPitch",
-    "lowZoomMaxPitch",
-    "apiKey",
-    "zoomControl",
-    "trafficControl",
-    "trafficOn",
-    "scaleControl",
-    "floorControl",
-    "copyright",
-    "autoHideOSMCopyright",
-    "controlsLayoutPadding",
-    "disableHidingPois",
-    "disableZoomOnScroll",
-    "disableRotationByUserInteraction",
-    "keepCenterWhileUserZoomRotate",
-    "disablePitchByUserInteraction",
-    "disableDragging",
-    "enableTwoFingerDragging",
-    "padding",
-    "preserveDrawingBuffer",
-    "defaultBackgroundColor",
-    "style",
-    "styleState",
-    "styleOptions",
-    "lang",
-    "useRtlTextPlugin",
-    "enableTrackResize",
-    "disableAntiAliasing",
-    "disableRenderingCache",
-    "webglVersion",
-    "graphicsPreset"
-];
+export interface LeafletLatLng {
+    lat: number;
+    lng: number;
+}
+
+export interface MapEventState {
+    zoom: number | null; // getZoom(): number;
+    rotation: number | null; // getRotation(): number;
+    pitch: number | null; // getPitch(): number;
+    center: number[] | null; // getCenter(): number[];
+    styleZoom: number | null; // getStyleZoom(): number;
+    latlng: LeafletLatLng | null;
+}
 
 export interface MapEvent {
-    /**
-     * True if event was emitted by user's interaction.
-     */
+
+
     isUser: boolean;
-}
+};
 /**
  * Emitted when traffic visibility state changes
  */
@@ -553,7 +521,7 @@ export interface FitBoundsOptions {
 }
 
 
-export type DGisMapGLMapRef = {
+export type DMapRef = {
     setCenter(center: number[], options?: AnimationOptions): void;
     setZoom(zoom: number, options?: ZoomAnimationOptions): void;
     /**
@@ -658,5 +626,449 @@ export type DGisMapGLMapRef = {
    */
     fitBounds(bounds: LngLatBounds, options?: FitBoundsOptions): void;
 
+    flyTo: (latlng: LatLngLiteral, zoom?: number, options?: ZoomPanOptions) => void;
 
+
+}
+
+export interface ZoomOptions {
+    animate?: boolean | undefined;
+}
+
+export interface PanOptions {
+    animate?: boolean | undefined;
+    duration?: number | undefined;
+    easeLinearity?: number | undefined;
+    noMoveStart?: boolean | undefined;
+}
+
+
+export interface ZoomPanOptions extends ZoomOptions, PanOptions { }
+
+export interface LatLngLiteral {
+    lat: number;
+    lng: number;
+    alt?: number;
+}
+
+export type LatLngTuple = [number, number, number?];
+
+
+export type LatLngExpression = LatLngLiteral | LatLngTuple;
+
+
+export type MarkerProps = {
+    uniqueId: string,
+    onPress?: () => void,
+    options?: MarkerOptions,
+    ignoreAutoFit?: boolean | undefined,
+}
+
+
+export interface MarkerOptions {
+    /**
+     * Geographical coordinates of marker center `[longitude, latitude, altitude?]`,
+     * where altitude is an optional component in meters.
+     */
+    coordinates: number[];
+    /**
+     * Marker icon URL.
+     */
+    icon?: string;
+    /**
+     * Marker icon size `[width, height]` in pixels.
+     */
+    size?: number[];
+    /**
+     * The position in pixels of the "tip" of the icon (relative to its top left corner).
+     * The icon will be aligned so that this point is at the marker's geographical location.
+     * Centered by default if size is specified.
+     */
+    anchor?: number[];
+    /** Marker icon opacity. */
+    opacity?: number;
+    /**
+     * Icon clockwise rotation in the screen plane in degrees.
+     */
+    rotation?: number;
+
+
+    /**
+     * Draw order.
+     */
+    zIndex?: number;
+
+
+}
+
+/**
+ * Defines the polyline rendering mode. Use:
+ * - '3d' to use the depth buffer.
+ * - '2d' to add a layer with no depth.
+ */
+export type PolylineRenderingMode = '2d' | '3d';
+
+/**
+ * Settings for drawing an object
+ * on the surface of another map object
+ */
+export interface TierOption {
+}
+/**
+ * Polyline initialization options.
+ */
+export interface PolylineOptions extends TierOption {
+    /**
+     * An array of polyline coordinates: `[firstPoint, secondPoint, ...]`.
+     * Each point is a geographical point: `[longitude, latitude]`.
+     */
+    coordinates: number[][];
+    /**
+     * Draw order of the first line.
+     */
+    zIndex?: number;
+
+    /**
+     * The line width in pixels.
+     */
+    width?: number;
+
+
+    /**
+     * The line color in hexadecimal RGB (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    color?: string;
+
+    /**
+     * The length of the gap in pixels. The default gap length is equal to the dash length.
+     */
+    gapLength?: number;
+    /**
+     * The gap color in hexadecimal RGB (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    gapColor?: string;
+    /**
+     * The length of the dash in pixels. If no dash length is specified, a polyline will be drawn.
+     */
+    dashLength?: number;
+    /**
+     * Minimum display styleZoom.
+     */
+    minZoom?: number;
+    /**
+     * Maximum display styleZoom.
+     */
+    maxZoom?: number;
+    /**
+     * Allows the polyline to emit events (like `mouseover`). `true` by default.
+     */
+    interactive?: boolean;
+    /**
+     * User specific data.
+     */
+    userData?: any;
+    /**
+     * Rendering mode. '2d' is default.
+     */
+    renderingMode?: PolylineRenderingMode;
+    /**
+     * The color of a line section that is hidden by other objects in '3d' rendering mode
+     * in RGB hexadecimal (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    hiddenPartColor?: string;
+    /**
+     * The gap color of a line section that is hidden by other objects in '3d' rendering mode
+     * in RGB hexadecimal (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    hiddenPartGapColor?: string;
+}
+
+
+export type PolylineProps = {
+    uniqueId: string,
+    options?: PolylineOptions,
+    ignoreAutoFit?: boolean | undefined,
+
+}
+
+
+export type LabelProps = {
+    uniqueId: string,
+    onPress?: () => void,
+    options?: LabelOptions,
+    ignoreAutoFit?: boolean | undefined,
+
+}
+/**
+ * Source image for text label background.
+ */
+export interface LabelImage {
+    /**
+     * Source image URL.
+     */
+    url: string;
+    /**
+     * `[width, height]` — image size in logical pixels
+     */
+    size: [number, number];
+    /**
+     * Defines the parts of the image that can be stretched horizontally.
+     */
+    stretchX?: Array<[number, number]>;
+    /**
+     * Defines the parts of the image that can be stretched vertically.
+     */
+    stretchY?: Array<[number, number]>;
+    /**
+     * The ratio of logical pixels in the image to physical pixels on the screen.
+     */
+    pixelRatio?: number;
+    /**
+     * Sets the space in pixels between the label text box and the edge of the stretched image
+     * for all four sides [top, right, bottom, left], like in CSS.
+     * [0, 0, 0, 0] by default.
+     */
+    padding?: [number, number, number, number];
+}
+
+/**
+ * Label initialization options.
+ */
+export interface LabelOptions {
+    /**
+     * An array of numbers `[longitude, latitude, height?]`, where:
+     *   - 'longitude' and 'latitude' are the geographical coordinates of the top-left corner of the label.
+     *     Taking into account the `relativeAnchor` option.
+     *   - 'height' is an optional number in meters by which the label will be raised/lowered (depending on the sign of the value)
+     *     relative to the map surface. 0 by default.
+     */
+    coordinates: number[];
+    /**
+     * Label's text.
+     */
+    text: string;
+
+    /**
+    * Background image for the label.
+    */
+    image?: LabelImage;
+    /**
+     * Minimum display styleZoom of the label.
+     */
+    minZoom?: number;
+    /**
+     * Maximum display styleZoom of the label.
+     */
+    maxZoom?: number;
+    /**
+     * Text color in hexadecimal RGB (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    color?: string;
+    /**
+     * Text size.
+     */
+    fontSize?: number;
+    /**
+     * Use `haloRadius` to add background behind each letter.
+     */
+    haloRadius?: number;
+    /**
+     * Background color of letters (when `haloRadius` is specified). The same format as for `color`.
+     */
+    haloColor?: string;
+    /**
+     * Space between each letter.
+     */
+    letterSpacing?: number;
+    /**
+     * For multiline label `lineHeight` specify how far lines between each other.
+     */
+    lineHeight?: number;
+    /**
+     * The offset distance of text box from its `relativeAnchor`.
+     * Positive values indicate left and up, while negative values indicate right and down.
+     *
+     * **[DEPRECATED]** Will be removed in the next major release, use the `offset` option instead.
+     * @deprecated
+     */
+    anchor?: number[];
+    /**
+     * The offset distance of text box from its `relativeAnchor`.
+     * Positive values indicate right and down, while negative values indicate left and up.
+     */
+    offset?: number[];
+    /**
+     * Coordinates (from 0 to 1 in each dimension) of the text box "tip" relative to its top left corner, for example:
+     * [0, 0] value is the top left corner, [0.5, 0.5] — center point, and [1, 1] is the bottom right corner of the box.
+     * The label will be placed so that this point is at geographical `coordinates` respects the absolute `offset`.
+     */
+    relativeAnchor?: number[];
+    /**
+     * Draw order.
+     */
+    zIndex?: number;
+    /**
+     * User specific data.
+     */
+    userData?: any;
+    /**
+     * Allows the label to emit events (like `mouseover`). `false` by default.
+     */
+    interactive?: boolean;
+    /**
+     * Labeling options
+     * - none — the label is not involved in the labeling process in any way
+     * - pointLabelsOnly — the label overlaps or can be overlapped
+     * by labels having this labeling option specified as type
+     */
+    labeling?: {
+        type: 'none';
+    } | {
+        type: 'pointLabelsOnly';
+    };
+}
+
+
+
+export type HtmlMarkerProps = {
+    uniqueId: string,
+    options?: HtmlMarkerOptions,
+    ignoreAutoFit?: boolean | undefined,
+
+}
+
+/**
+ * HtmlMarker initialization options.
+ */
+export interface HtmlMarkerOptions {
+    /**
+     * An array of numbers `[longitude, latitude, height?]`, where:
+     *   - 'longitude' and 'latitude' are the geographical coordinates of the top-left corner of the HTML marker.
+     *     Taking into account the 'anchor' option.
+     *   - 'height' is an optional number in meters by which the marker will be raised/lowered (depending on the sign of the value)
+     *     relative to the map surface. 0 by default.
+     */
+    coordinates: number[];
+    /**
+     * HTML content of the HTML marker.
+     */
+    html: HTMLElement | string;
+    /**
+     * The position in pixels of the "tip" of the HTML marker relative to its top-left corner.
+     */
+    anchor?: number[];
+    /**
+     * Minimum display styleZoom of the HTML marker.
+     */
+    minZoom?: number;
+    /**
+     * Maximum display styleZoom of the HTML marker.
+     */
+    maxZoom?: number;
+    /**
+     * Draw order.
+     */
+    zIndex?: number;
+    /**
+     * Capture events if set. Otherwise events will passed to the map. By default it's `true`.
+     */
+    preventMapInteractions?: boolean;
+    /**
+     * User specific data.
+     */
+    userData?: any;
+    /**
+     * HTML marker can be pointer-event target if this option is set to `true` (pointer-events: auto),
+     * otherwise it can't (pointer-events: none).
+     */
+    interactive?: boolean;
+    /**
+     * If true, the marker coordinates will not be rounded. By default it's `false`.
+     */
+    disableRounding?: boolean;
+    /**
+     * HTML marker labeling options.
+     * - type: 'none' — the marker is always visible and not involved in labeling
+     * - type: 'full' — the marker can hide other labeling elements or can be hidden
+     * - type: 'invincible' — the marker is always visible and can hide other labeling elements
+     * - type: 'pinnedToPoi' — the marker can hide other labeling elements or can be hidden. It's labeling behavior is taken from the linked POI id.
+     * - width — the width of the labeling box
+     * - height — the height of the labeling box
+     * - offset — the offset in pixels of the labeling box. Positive values indicate right and down, while negative values indicate left and up.
+     * - poiId — the linked POI id
+     */
+    labeling?: {
+        type: 'none';
+    } | {
+        type: 'invincible' | 'full';
+        width: number;
+        height: number;
+        offset?: number[];
+    } | {
+        type: 'pinnedToPoi';
+        poiId: string;
+        width: number;
+        height: number;
+        offset?: number[];
+    };
+}
+
+
+export type PolygonProps = {
+    uniqueId: string,
+    options?: PolygonOptions,
+    ignoreAutoFit?: boolean | undefined,
+
+}
+
+/**
+ * Polygon initialization options.
+ */
+export interface PolygonOptions extends TierOption {
+    /**
+     * Geographical coordinates of polygon points in format: `[outerEdges, cropEdges1, cropEdges2, ...]`.
+     *
+     * The first section is `outerEdges` which describes an array of outer edges: `[firstPoint, secondPoint, ..., firstPoint]`.
+     * Each point is a geographical point: `[longitude, latitude]`. The last point should be the same as the first.
+     *
+     * Then optionally you can crop some polygons from the main one (outer) by specifying `cropEdges1`, `cropEdges2` and so on.
+     * A format is the same as the main section: `[firstPoint, secondPoint, ..., firstPoint]` each point is `[longitude, latitude]`.
+     *
+     * Important: `outerEdges` and `cropEdgesN` must not touch or intersect each other.
+     *
+     * Only the first section (`outerEdges`) is required. There may be many `cropEdges` sections.
+     */
+    coordinates: number[][][];
+    /**
+     * Draw order.
+     */
+    zIndex?: number;
+    /**
+     * Minimum display styleZoom.
+     */
+    minZoom?: number;
+    /**
+     * Maximum display styleZoom.
+     */
+    maxZoom?: number;
+    /**
+     * Fill color in hexadecimal RGB (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    color?: string;
+    /**
+     * Stroke color in hexadecimal RGB (`#ff0000`) or RGBA (`#ff0000ff`) format.
+     */
+    strokeColor?: string;
+    /**
+     * Stroke width in pixels.
+     */
+    strokeWidth?: number;
+    /**
+     * Allows the polygon to emit events (like `mouseover`). `true` by default.
+     */
+    interactive?: boolean;
+    /**
+     * User specific data.
+     */
+    userData?: any;
 }

@@ -1,3 +1,49 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const cache: {
+    [key: string]: string | undefined
+} = {
+
+}
+
+
+async function fetchWithRetry(
+    key: string,
+    url: string,
+
+): Promise<string> {
+
+
+    const maxRetries = 10;
+    const delay = 5000;
+
+    if (cache[key]) {
+        return cache[key];
+    }
+
+    let stored = await AsyncStorage.getItem(key);
+    if (stored) {
+        cache[key] = stored;
+        return stored;
+    }
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await fetch(url);
+            const text = await response.text();
+            await AsyncStorage.setItem(key, text);
+            cache[key] = text;
+            return text;
+        } catch (e) {
+            console.warn(`Failed to fetch ${key}, attempt ${attempt}/${maxRetries}`);
+            if (attempt < maxRetries) {
+                await new Promise((res) => setTimeout(res, delay));
+            }
+        }
+    }
+
+    throw new Error(`Unable to fetch ${key} after ${maxRetries} attempts`);
+}
 
 
 
@@ -12,8 +58,11 @@ export const getWebContent = async (params: {
     //Загружаем скрипты как текст
 
 
-    const response = await fetch(params.mapglGisJSLink);
-    const mapglGisJS = await response.text();
+
+    const mapglGisJS = await fetchWithRetry('mapglGisJS', params.mapglGisJSLink);
+
+
+
 
 
 
@@ -55,8 +104,12 @@ export const getWebContent = async (params: {
 
     var markers = {};
     var polylines = {};
+    var labels = {};
     var polygons = {};
     var rectangles = {};
+    var htmlMarkers = {};
+
+    var currentStyleID = null;
 
     var tileLayer = null;
 
@@ -79,6 +132,8 @@ export const getWebContent = async (params: {
 ${params.functionsMirrorJS}
 
 }      catch (e) {
+
+
         window.ReactNativeWebView.postMessage(JSON.stringify({
             type: 'error',
             data: {
